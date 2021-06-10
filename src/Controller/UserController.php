@@ -17,11 +17,12 @@ class UserController extends AbstractController
 
     // creamos un metodo que solo le vamos a dar uso en el controlodaor 
 
-    private function resJson($data) {
+    private function resJson($data)
+    {
 
         //serializar datos con servicio serializer
 
-        $json = $this->get('serializer')->serialize($data,'json');
+        $json = $this->get('serializer')->serialize($data, 'json');
 
         //Response con httpfoudation
 
@@ -32,46 +33,46 @@ class UserController extends AbstractController
         $response->setContent($json);
 
         //Indicar formato de la respuesta
-        
-        $response->headers->set('content-Type','application/json');
+
+        $response->headers->set('content-Type', 'application/json');
 
         //Devolver la respuesta
         return $response;
-        
     }
-   
+
     public function index()
     {
 
-       $user_repo = $this->getDoctrine()->getRepository(User::class);
-       $video_repo = $this->getDoctrine()->getRepository(Video::class);
+        $user_repo = $this->getDoctrine()->getRepository(User::class);
+        $video_repo = $this->getDoctrine()->getRepository(Video::class);
 
-       $users = $user_repo->findAll();
+        $users = $user_repo->findAll();
 
-       $videos = $video_repo->findAll();
+        $videos = $video_repo->findAll();
 
-    
 
-      /* foreach($users as $user){
+
+        /* foreach($users as $user){
            echo "<h1>{$user->getName()} {$user->getLastname()}</h1>";
        };
        foreach($user->getVideos() as $video){
         echo "<p>{$video->getUrl()}</p>";
 
        }*/
-    
-       //die();
 
-        return $this->resJson([$videos]);
+        //die();
+
+        return $this->resJson([$videos,$users]);
     }
 
 
     // Metodo Crear 
 
-    public function create(Request $request){
+    public function create(Request $request)
+    {
 
         // Recoger datos 
-        $json = $request->get('json',null);
+        $json = $request->get('json', null);
 
 
         //Decodificar el json
@@ -82,51 +83,46 @@ class UserController extends AbstractController
 
         $data_example = [
 
-            "Status"=> "Success",
-            "code"=>"200",
-            "message"=>"User creado con exito",
-            'json'=>$params
+            "Status" => "Success",
+            "code" => "200",
+            "message" => "User creado con exito",
+            'json' => $params
         ];
 
 
         //Comprobar y validar los datos
 
-        if($json != null){
+        if ($json != null) {
 
-             $name= (!empty($params->name)) ? $params->name : null;
-             $lastname= (!empty($params->lastname)) ? $params->lastname : null;
-             $email= (!empty($params->email)) ? $params->email : null;
-             $password= (!empty($params->password)) ? $params->password : null;
-             $role= (!empty($params->role)) ? $params->role : null;
+            $name = (!empty($params->name)) ? $params->name : null;
+            $lastname = (!empty($params->lastname)) ? $params->lastname : null;
+            $email = (!empty($params->email)) ? $params->email : null;
+            $password = (!empty($params->password)) ? $params->password : null;
+            $role = (!empty($params->role)) ? $params->role : null;
 
 
-             $validator = Validation::createValidator();
-             $validate_email = $validator->validate($email , [
-                 new Email()
-             ]);
+            $validator = Validation::createValidator();
+            $validate_email = $validator->validate($email, [
+                new Email()
+            ]);
 
-             if(!empty($email) && count($validate_email)==0 && !empty($password) && !empty($name) && !empty($lastname) && !empty($role)){
+            if (!empty($email) && count($validate_email) == 0 && !empty($password) && !empty($name) && !empty($lastname) && !empty($role)) {
                 $data = [
 
-                    "Status"=> "Success",
-                    "code"=>"200",
-                    "message"=>"Validacion correcta",
-                    
-                ];
+                    "Status" => "Success",
+                    "code" => "200",
+                    "message" => "Validacion correcta",
 
-             }else{
+                ];
+            } else {
                 $data = [
 
-                    "Status"=> "Error",
-                    "code"=>"500",
-                    "message"=>"Validacion Incorrecta",
-                   
+                    "Status" => "Error",
+                    "code" => "500",
+                    "message" => "Validacion Incorrecta",
+
                 ];
-
-             }
-
-
-
+            }
         }
 
 
@@ -152,17 +148,43 @@ class UserController extends AbstractController
 
         //Comporbar si ya existe el user
 
+        $doctrine = $this->getDoctrine();
+        $em = $doctrine->getManager();
+        $user_repo = $doctrine->getRepository(User::class);
+
+        $isset_user = $user_repo->findBy(array(
+            'email' => $email
+        ));
+
+
+
+        if (count($isset_user) == 0) {
+            $data = [
+
+                "Status" => "Success",
+                "code" => "200",
+                "message" => "Usuario Creado Correctamente",
+                "user" => $user
+
+            ];
+        } else {
+            $data = [
+
+                "Status" => "Error",
+                "code" => "500",
+                "message" => "El Usuario ya existe"
+
+            ];
+        }
 
         // Si no existe , guardar el user en la base de datos
 
+        $em->persist($user);
+        $em->flush();
 
         // Hacer la respuesta json
-        
-
-        return  new JsonResponse($data);
 
 
-
-
+        return  $this->resJson($data);
     }
 }
