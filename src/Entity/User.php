@@ -72,11 +72,12 @@ class User implements \JsonSerializable
 
     private $videos;
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->videos = new ArrayCollection();
     }
 
-  
+
 
     public function getId(): ?string
     {
@@ -165,15 +166,13 @@ class User implements \JsonSerializable
 
     public function jsonSerialize()
     {
-       return [
+        return [
 
-            'id'=> $this->id,
-            'name'=>$this->name,
-            'lastname'=>$this->lastname,
-            'email'=>$this->email,
-            'role'=>$this->role
+            'id' => $this->id,
+            'name' => $this->name,
+            'lastname' => $this->lastname,
+            'email' => $this->email,
+            'role' => $this->role
         ];
     }
-
-
 }

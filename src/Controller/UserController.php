@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Validation;
+use App\Services\JwtAuth;
+
 
 class UserController extends AbstractController
 {
@@ -62,7 +64,7 @@ class UserController extends AbstractController
 
         //die();
 
-        return $this->resJson([$videos,$users]);
+        return $this->resJson([$videos, $users]);
     }
 
 
@@ -192,33 +194,66 @@ class UserController extends AbstractController
 
     // Metodo login
 
-    public  function login(Request $request)
-    { 
-         // Recibir datos por post
+    public  function login(Request $request, JwtAuth $jwtAuth)
+    {
+        // Recibir datos por post
+
+        $json = $request->get('json', null);
+        $params = json_decode($json);
+
+        // El array por defecto a devolver
 
 
-         // El array por defecto a devolver
+        $data_por_defecto = [
+
+            "Status" => "Error",
+            "Code" => 500,
+            "Message" => "El usuario no se ha podido identificar"
+        ];
 
 
-         $data_por_defecto = [
+        //Comprobar y validar los datos
 
-            "Status"=> "Error",
-            "Code"=> 500,
-            "Message"=> "El usuario no se ha podido identificar"
-         ];
+        if ($json != null) {
+
+            $email = (!empty($params->email)) ? $params->email : null;
+            $password = (!empty($params->password)) ? $params->password : null;
+            $getToken = (!empty($params->getToken)) ? $params->getToken : null;
+
+            $validator = Validation::createValidator();
+            $validate_email = $validator->validate($email, [
+                new Email()
+            ]);
+        }
+
+        if (!empty($email) && !empty($password) && count($validate_email) == 0) {
+
+            //Cifrar el password
+
+            $password_hashed = hash('sha256', $password);
+
+            // Validacion
+
+            if ($getToken) {
+
+                $signup = $jwtAuth->signup($email, $password_hashed, $getToken);
+            } else {
+                $signup = $jwtAuth->signup($email, $password_hashed);
+            }
+            return new JsonResponse($signup);
+        }
 
 
-         //Comprobar y validar los datos
 
 
-         //Cifrar el password
 
 
-         // Validacion
 
 
-         //Respuesta HTTP
 
-         return $this->resJson($data_por_defecto);
+
+        //Respuesta HTTP
+
+        return $this->resJson($data_por_defecto);
     }
 }
