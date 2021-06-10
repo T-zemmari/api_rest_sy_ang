@@ -15,6 +15,13 @@ register:
     path: /register
     controller: App\Controller\UserController::create
     methods: [POST]
+    
+ 
+login:
+    path: /login
+    controller: App\Controller\UserController::login
+    methods: [POST]
+       
 
 # Ruta para el controlador video #
 

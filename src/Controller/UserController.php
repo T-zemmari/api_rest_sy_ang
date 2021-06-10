@@ -187,4 +187,38 @@ class UserController extends AbstractController
 
         return  $this->resJson($data);
     }
+
+
+
+    // Metodo login
+
+    public  function login(Request $request)
+    { 
+         // Recibir datos por post
+
+
+         // El array por defecto a devolver
+
+
+         $data_por_defecto = [
+
+            "Status"=> "Error",
+            "Code"=> 500,
+            "Message"=> "El usuario no se ha podido identificar"
+         ];
+
+
+         //Comprobar y validar los datos
+
+
+         //Cifrar el password
+
+
+         // Validacion
+
+
+         //Respuesta HTTP
+
+         return $this->resJson($data_por_defecto);
+    }
 }
