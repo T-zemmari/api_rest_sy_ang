@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use JsonSerializable;
 
 /**
  * User
@@ -12,7 +13,7 @@ use Doctrine\Common\Collections\Collection;
  * @ORM\Table(name="user")
  * @ORM\Entity
  */
-class User
+class User implements \JsonSerializable
 {
     /**
      * @var int
@@ -157,8 +158,21 @@ class User
     /*
      * @return collection|Video[]
      */
-    public function getVideos(): Collection{
+
+    /*public function getVideos(): Collection{
         return $this->videos;
+    }*/
+
+    public function jsonSerialize()
+    {
+       return [
+
+            'id'=> $this->id,
+            'name'=>$this->name,
+            'lastname'=>$this->lastname,
+            'email'=>$this->email,
+            'role'=>$this->role
+        ];
     }
 
 

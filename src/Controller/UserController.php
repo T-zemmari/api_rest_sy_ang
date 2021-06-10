@@ -10,6 +10,31 @@ use App\Entity\Video;
 
 class UserController extends AbstractController
 {
+
+    // creamos un metodo que solo le vamos a dar uso en el controlodaor 
+
+    private function resJson($data) {
+
+        //serializar datos con servicio serializer
+
+        $json = $this->get('serializer')->serialize($data,'json');
+
+        //Response con httpfoudation
+
+        $response = new Response();
+
+        // Asignar contenido a la respuesta
+
+        $response->setContent($json);
+
+        //Indicar formato de la respuesta
+        
+        $response->headers->set('content-Type','application/json');
+
+        //Devolver la respuesta
+        return $response;
+        
+    }
    
     public function index()
     {
@@ -19,19 +44,21 @@ class UserController extends AbstractController
 
        $users = $user_repo->findAll();
 
-       foreach($users as $user){
+       $data = [
+        'message' => 'Welcome to your new controller!',
+        'path' => 'src/Controller/UserController.php',
+       ];
+
+      /* foreach($users as $user){
            echo "<h1>{$user->getName()} {$user->getLastname()}</h1>";
        };
        foreach($user->getVideos() as $video){
         echo "<p>{$video->getUrl()}</p>";
 
-       }
+       }*/
     
-       die();
+       //die();
 
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/UserController.php',
-        ]);
+        return $this->resJson($users);
     }
 }
