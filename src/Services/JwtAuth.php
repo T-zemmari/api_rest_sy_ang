@@ -73,4 +73,23 @@ class JwtAuth
 
         return $data;
     }
+
+    // CheckToken--------------------
+
+    public function authToken($jwt){
+
+          $auth = false;
+
+          $decoded = JWT::decode($jwt,$this->key,['HS256']);
+
+          if(isset($decoded) && is_object($decoded) && !empty($decoded) && isset($decoded->sub)){
+              $auth = true;
+          }else{
+            $auth = false;
+          }
+
+
+          return $auth;
+
+    }
 }

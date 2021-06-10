@@ -251,16 +251,22 @@ class UserController extends AbstractController
 
     //--Metodo editar y actualizar los datos del usuario-------------------------//
 
-    public function update(Request $request){
+    public function update(Request $request , JwtAuth $jwtAuth){
     
-       
+       $token = $request->headers->get('Autorization');
+
+      $authCheck= $jwtAuth->authToken($token);
+
+      
 
 
         $data_por_defecto = [
 
             "Status" => "Error",
             "Code" => 500,
-            "Message" => "El usuario no se ha podido identificar"
+            "Message" => "El usuario no se ha podido identificar",
+            "token"=>$token,
+            "autochek_Token"=>$authCheck
         ];
 
 
