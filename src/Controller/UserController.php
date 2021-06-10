@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use App\Entity\User;
 use App\Entity\Video;
-
+use Symfony\Component\HttpFoundation\Request;
 
 class UserController extends AbstractController
 {
@@ -44,10 +44,9 @@ class UserController extends AbstractController
 
        $users = $user_repo->findAll();
 
-       $data = [
-        'message' => 'Welcome to your new controller!',
-        'path' => 'src/Controller/UserController.php',
-       ];
+       $videos = $video_repo->findAll();
+
+    
 
       /* foreach($users as $user){
            echo "<h1>{$user->getName()} {$user->getLastname()}</h1>";
@@ -59,6 +58,51 @@ class UserController extends AbstractController
     
        //die();
 
-        return $this->resJson($users);
+        return $this->resJson([$videos]);
+    }
+
+
+    // Metodo Crear 
+
+    public function create(Request $request){
+
+        // Recoger datos 
+
+
+        //Decodificar el json
+
+
+        // Respuesta por defecto
+
+        $data = [
+
+            "Status"=> "Success",
+            "code"=>"200",
+            "message"=>"User creado con exito"
+        ];
+
+
+        //Comprobar y validar los datos
+
+
+        //Si todo ok, crear el objeto del user
+
+
+        //Encryptar la contraseña
+
+
+        //Comporbar si ya existe el user
+
+
+        // Si no existe , guardar el user en la base de datos
+
+
+        // Hacer la respuesta json
+
+        return $this->resJson($data);
+
+
+
+
     }
 }
