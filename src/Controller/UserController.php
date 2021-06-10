@@ -258,14 +258,93 @@ class UserController extends AbstractController
 
         $authCheck = $jwtAuth->authToken($token);
 
+
         $data_por_defecto = [
 
             "Status" => "Error",
             "Code" => 500,
-            "Message" => "El usuario no se ha podido identificar",
-            "token" => $token,
-            "autochek_Token" => $authCheck
+            "Message" =>  "Usuario no Actualiazado",
         ];
+
+
+
+        if ($authCheck) {
+
+            $em = $this->getDoctrine()->getManager();
+            $datos_del_usuario = $jwtAuth->authToken($token, true);
+
+            $doctrine = $this->getDoctrine();
+            $user_repo = $doctrine->getRepository(User::class);
+
+
+
+            $user = $user_repo->findOneBy([
+                "id" => $datos_del_usuario->sub
+            ]);
+
+
+
+            $json = $request->get('json', null);
+            $params = json_decode($json);
+
+            /*var_dump($params);
+            die;*/
+
+            if (!empty($json)) {
+
+                $name = (!empty($params->name)) ? $params->name : null;
+                $lastname = (!empty($params->lastname)) ? $params->lastname : null;
+                $email = (!empty($params->email)) ? $params->email : null;
+
+                $validator = Validation::createValidator();
+                $validate_email = $validator->validate($email, [
+                    new Email()
+                ]);
+
+                if (!empty($email) && count($validate_email) == 0  && !empty($name) && !empty($lastname)) {
+
+                    $user->setName($name);
+                    $user->setEmail($email);
+                    $user->setLastname($lastname);
+
+                    //comporobar si el usuario existe y controlar la duplicidad
+
+                    $isset_user = $user_repo->findBy([
+
+                        'email' => $email
+
+                    ]);
+
+
+                    if (count($isset_user) == 0) {
+
+
+
+                        $em->persist($user);
+                        $em->flush();
+
+
+                        $data_por_defecto = [
+
+                            "Status" => "Success",
+                            "Code" => 200,
+                            "Message" =>  "Usuario  Actualiazado",
+                            "user" => $user
+                        ];
+                    } else {
+
+                        $data_por_defecto = [
+
+                            "Status" => "Error",
+                            "Code" => 500,
+                            "Message" =>  "No se puede utilizar ese email",
+                        ];
+                    }
+                }
+            }
+        }
+
+
 
 
         return $this->resJson($data_por_defecto);

@@ -76,20 +76,21 @@ class JwtAuth
 
     // CheckToken--------------------
 
-    public function authToken($jwt)
+    public function authToken($jwt, $datos_del_usuario = false)
     {
 
         $auth = false;
 
 
-        try{
-            $decoded = JWT::decode($jwt, $this->key, ['HS256']);}catch(\UnexpectedValueException $e){
-                $auth = false;
-            }catch(\DomainException $e){
-                $auth = false;
-            }
+        try {
+            $decoded = JWT::decode($jwt, $this->key, ['HS256']);
+        } catch (\UnexpectedValueException $e) {
+            $auth = false;
+        } catch (\DomainException $e) {
+            $auth = false;
+        }
 
-        
+
 
         if (isset($decoded) && is_object($decoded) && !empty($decoded) && isset($decoded->sub)) {
             $auth = true;
@@ -97,7 +98,10 @@ class JwtAuth
             $auth = false;
         }
 
-
-        return $auth;
+        if ($datos_del_usuario !== false) {
+            return $decoded;
+        } else {
+            return $auth;
+        }
     }
 }
