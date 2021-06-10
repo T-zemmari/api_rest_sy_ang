@@ -316,7 +316,7 @@ class UserController extends AbstractController
                     ]);
 
 
-                    if (count($isset_user) == 0) {
+                    if ((count($isset_user) == 0)) {
 
 
 
