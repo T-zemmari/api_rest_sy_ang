@@ -4,9 +4,13 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\User;
 use App\Entity\Video;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Validation;
 
 class UserController extends AbstractController
 {
@@ -67,28 +71,83 @@ class UserController extends AbstractController
     public function create(Request $request){
 
         // Recoger datos 
+        $json = $request->get('json',null);
 
 
         //Decodificar el json
 
+        $params = json_decode($json);
 
         // Respuesta por defecto
 
-        $data = [
+        $data_example = [
 
             "Status"=> "Success",
             "code"=>"200",
-            "message"=>"User creado con exito"
+            "message"=>"User creado con exito",
+            'json'=>$params
         ];
 
 
         //Comprobar y validar los datos
 
+        if($json != null){
+
+             $name= (!empty($params->name)) ? $params->name : null;
+             $lastname= (!empty($params->lastname)) ? $params->lastname : null;
+             $email= (!empty($params->email)) ? $params->email : null;
+             $password= (!empty($params->password)) ? $params->password : null;
+             $role= (!empty($params->role)) ? $params->role : null;
+
+
+             $validator = Validation::createValidator();
+             $validate_email = $validator->validate($email , [
+                 new Email()
+             ]);
+
+             if(!empty($email) && count($validate_email)==0 && !empty($password) && !empty($name) && !empty($lastname) && !empty($role)){
+                $data = [
+
+                    "Status"=> "Success",
+                    "code"=>"200",
+                    "message"=>"Validacion correcta",
+                    
+                ];
+
+             }else{
+                $data = [
+
+                    "Status"=> "Error",
+                    "code"=>"500",
+                    "message"=>"Validacion Incorrecta",
+                   
+                ];
+
+             }
+
+
+
+        }
+
 
         //Si todo ok, crear el objeto del user
 
 
+        $user = new User();
+
+        $user->setName($name);
+        $user->setLastname($lastname);
+        $user->setEmail($email);
+        $user->setRole('ROLE_USER');
+        $user->setCreatedAt(new \DateTime('now'));
+
+
         //Encryptar la contraseña
+
+        $password_hasheado = hash('sha256', $password);
+        $user->setPassword($password_hasheado);
+
+        $data = $user;
 
 
         //Comporbar si ya existe el user
@@ -98,8 +157,9 @@ class UserController extends AbstractController
 
 
         // Hacer la respuesta json
+        
 
-        return $this->resJson($data);
+        return  new JsonResponse($data);
 
 
 
