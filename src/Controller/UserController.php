@@ -68,7 +68,7 @@ class UserController extends AbstractController
     }
 
 
-    // Metodo Crear 
+    // Metodo Crear-usuarios---------------------------------------------------------//
 
     public function create(Request $request)
     {
@@ -192,7 +192,7 @@ class UserController extends AbstractController
 
 
 
-    // Metodo login
+    // Metodo login----------------------------------//
 
     public  function login(Request $request, JwtAuth $jwtAuth)
     {
@@ -242,18 +242,30 @@ class UserController extends AbstractController
             }
             return new JsonResponse($signup);
         }
-
-
-
-
-
-
-
-
-
-
         //Respuesta HTTP
 
         return $this->resJson($data_por_defecto);
+    }
+
+
+
+    //--Metodo editar y actualizar los datos del usuario-------------------------//
+
+    public function update(Request $request){
+    
+       
+
+
+        $data_por_defecto = [
+
+            "Status" => "Error",
+            "Code" => 500,
+            "Message" => "El usuario no se ha podido identificar"
+        ];
+
+
+        return $this->resJson($data_por_defecto);
+    
+    
     }
 }
