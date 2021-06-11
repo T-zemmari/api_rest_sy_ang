@@ -10,6 +10,9 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Services\JwtAuth;
 use Knp\Component\Pager\PaginatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpParser\Node\Expr\Isset_;
+use Symfony\Component\Validator\Constraints\Url;
+use Symfony\Component\Validator\Validation;
 
 class VideoController extends AbstractController
 {
@@ -47,7 +50,7 @@ class VideoController extends AbstractController
 
 
 
-    public function create(Request $request, JwtAuth $jwtAuth)
+    public function create(Request $request, JwtAuth $jwtAuth , $id = null)
     {
 
 
@@ -79,14 +82,19 @@ class VideoController extends AbstractController
             if (!empty($json)) {
 
 
-                $user = (!empty($identity->sub)) ? $identity->sub : null;
+                $user_id = (!empty($identity->sub)) ? $identity->sub : null;
                 $title = (!empty($params->title)) ? $params->title : null;
                 $url = (!empty($params->url)) ? $params->url : null;
                 $descripction = (!empty($params->descripction)) ? $params->descripction : null;
                 $status = (!empty($params->status)) ? $params->status : null;
 
+                $validator = Validation::createValidator();
+                $validate_url = $validator->validate($url, [
+                    new Url()
+                ]);
 
-                if (!empty($title) && !empty($url)) {
+
+                if (!empty($user_id) && !empty($url) && count($validate_url) == 0) {
 
 
                     $data = [
@@ -111,6 +119,10 @@ class VideoController extends AbstractController
                     "id" => $identity->sub
                 ]);
 
+                
+
+                if($id == null){
+
                 $video = new Video();
 
                 $video->setTitle($title);
@@ -128,20 +140,29 @@ class VideoController extends AbstractController
                 $video_repo = $this->getDoctrine()->getRepository(Video::class);
 
 
-                $isset_video = $video_repo->findOneBy(array(
+                
+
+
+                $isset_video = $video_repo->findBy(array(
                     'url' => $url
                 ));
 
+            
+
+
+
 
                 if (count($isset_video) == 0) {
+               
                     $data = [
 
                         "Status" => "Success",
                         "code" => "200",
                         "message" => "Video Creado Correctamente",
-                        "user" => $video
-
+                        "video" => $video
+    
                     ];
+    
                 } else {
                     $data = [
 
@@ -156,6 +177,53 @@ class VideoController extends AbstractController
 
                 $em->persist($video);
                 $em->flush();
+
+                //---------Aqui termina la creacion dell video.
+            }else{
+
+               //Como se ha cumplido la condicion del id no es nulo ahora puedo modificar
+               $video = new Video();
+               $video->setTitle($title);
+               $video->setUrl($url);
+               $video->setStatus($status);
+               $video->setDescription($descripction);
+               $updatedAt = new \DateTime('now');
+               $video->setUpdatedAt($updatedAt);
+
+               $video_repo = $this->getDoctrine()->getRepository(Video::class);
+
+
+               $isset_video = $video_repo->findOneBy(array(
+                   'id' => $id
+               ));
+
+
+               if (count($isset_video) == 0) {
+                   $data = [
+
+                       "Status" => "Success",
+                       "code" => "200",
+                       "message" => "Video Creado Correctamente",
+                       "user" => $video
+
+                   ];
+               } else {
+                   $data = [
+
+                       "Status" => "Error",
+                       "code" => "500",
+                       "message" => "El Video ya existe"
+
+                   ];
+               }
+
+
+
+               $em->persist($video);
+               $em->flush();
+            
+            
+            }
             }
         }
 

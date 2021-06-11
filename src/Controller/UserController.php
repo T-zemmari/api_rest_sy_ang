@@ -158,7 +158,8 @@ class UserController extends AbstractController
             'email' => $email
         ));
 
-
+        var_dump($isset_user);
+        die;
 
         if (count($isset_user) == 0) {
             $data = [

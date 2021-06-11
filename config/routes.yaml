@@ -40,6 +40,11 @@ newVideo:
     controller: App\Controller\VideoController::create
     methods: [POST]
 
+editVideo:
+    path: /video/update/{id}
+    controller: App\Controller\VideoController::create
+    methods: [PUT]
+
 ListarVideo:
     path: /video/list
     controller: App\Controller\VideoController::listarVideos
