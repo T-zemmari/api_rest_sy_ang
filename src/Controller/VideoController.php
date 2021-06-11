@@ -51,7 +51,7 @@ class VideoController extends AbstractController
     public function create(Request $request, JwtAuth $jwtAuth)
     {
 
-        
+
 
         $token = $request->headers->get('Autorization', null);
 
@@ -74,7 +74,7 @@ class VideoController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $identity = $jwtAuth->authToken($token, true);
 
-            
+
 
 
             if (!empty($json)) {
@@ -109,7 +109,7 @@ class VideoController extends AbstractController
 
                 $user_repo = $this->getDoctrine()->getRepository(User::class);
                 $user = $user_repo->findOneBy([
-                    "id"=>$identity->sub
+                    "id" => $identity->sub
                 ]);
 
                 $video = new Video();
@@ -136,34 +136,32 @@ class VideoController extends AbstractController
 
                 if (count($isset_video) == 0) {
                     $data = [
-        
+
                         "Status" => "Success",
                         "code" => "200",
                         "message" => "Video Creado Correctamente",
                         "user" => $video
-        
+
                     ];
                 } else {
                     $data = [
-        
+
                         "Status" => "Error",
                         "code" => "500",
                         "message" => "El Video ya existe"
-        
+
                     ];
                 }
-        
-                
+
+
 
                 $em->persist($video);
                 $em->flush();
-
-
             }
         }
 
 
-       
+
 
 
 
@@ -174,13 +172,14 @@ class VideoController extends AbstractController
 
     // Listar los videos del usuario 
 
-      public function listarVideos(Request $request,JwtAuth $jwtAuth,PaginatorInterface $paginator,EntityManagerInterface $e){
+    public function listarVideos(Request $request, JwtAuth $jwtAuth, PaginatorInterface $paginator, EntityManagerInterface $e)
+    {
 
         $token = $request->headers->get('Autorization');
-    
+
         $auth = $jwtAuth->authToken($token);
-        $identity = $jwtAuth->authToken($token,true);
-       
+        $identity = $jwtAuth->authToken($token, true);
+
 
         $data = [
 
@@ -190,62 +189,114 @@ class VideoController extends AbstractController
         ];
 
 
-        if($auth){
+        if ($auth) {
 
-            $identity = $jwtAuth->authToken($token,true);   $identity = $jwtAuth->authToken($token,true);
+            $identity = $jwtAuth->authToken($token, true);
+            $identity = $jwtAuth->authToken($token, true);
 
             $em = $this->getDoctrine()->getManager();
             //$em->getRepository()
-            
 
-            
-          
+
+
+
 
             $dql = " SELECT v FROM App\Entity\Video v WHERE v.user = {$identity->sub} ORDER BY v.id DESC";
             $query = $e->createQuery($dql);
 
-            $page = $request->query->getInt('page',1);
+            $page = $request->query->getInt('page', 1);
 
             $item_per_page = 5;
 
-            $pagination = $paginator->paginate($query,$page,$item_per_page);
+            $pagination = $paginator->paginate($query, $page, $item_per_page);
             $total = $pagination->getTotalItemCount();
 
             $data = [
                 "Status" => "Success",
                 "Code" => 200,
                 "Total_items_count" => $total,
-                "page_actual"=>$page,
-                "item_per_page"=>$item_per_page,
-                "total_pages"=> ceil($total / $item_per_page),
-                "videos"=>$pagination,
-                "user_id"=>$identity->sub
-            
-            ];
+                "page_actual" => $page,
+                "item_per_page" => $item_per_page,
+                "total_pages" => ceil($total / $item_per_page),
+                "videos" => $pagination,
+                "user_id" => $identity->sub
 
+            ];
         }
 
 
 
 
         return $this->resJson($data);
-      }
+    }
 
-      // Obtener un video mediante su id pasado como parametro desde la url
+    // Obtener un video mediante su id pasado como parametro desde la url
 
-       
-      public function videoPorId(Request $request ,$id= null)
-      {
-          
+
+    public function videoPorId(Request $request, $id = null, JwtAuth $jwtAuth)
+    {
+
+
+
+        $token = $request->headers->get('Autorization');
+        $auth = $jwtAuth->authToken($token);
         $data = [
 
             "Status" => "Error",
             "Code" => 500,
-            "Message" => "El video No existe"
+            "Message" => "El video No existe",
+            "id" => $id
         ];
 
 
+        if ($auth) {
+
+
+            // Conseguir la identidad del usuario
+
+            $identity = $jwtAuth->authToken($token, true);
+
+
+
+            // Conseguir el objeto de la base de datos
+
+            $video_repo = $this->getDoctrine()->getRepository(Video::class);
+
+            $miVideo = $video_repo->findOneBy([
+
+                "id" => $id
+            ]);
+
+
+
+
+
+            //Comprobar que el video existe y que pertenece al usuario
+
+            if ($miVideo && is_object($miVideo) && $identity->sub == $miVideo->getUser()->getId()) {
+
+                $data = [
+
+                    "Status" => "Success",
+                    "Code" => 200,
+                    "Message" => "Video Encontrado",
+                    "id" => $id,
+                    "Video" => $miVideo
+                ];
+            } else {
+                $data = [
+
+                    "Status" => "Error",
+                    "Code" => 500,
+                    "Message" => "El video No existe",
+
+                ];
+            }
+        }
+
+
+        //Devolver la respuesta  
 
         return $this->resJson($data);
-      }
+    }
 }
