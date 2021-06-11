@@ -40,6 +40,6 @@ newVideo:
     methods: [POST]
 ListarVideo:
     path: /video/list
-    controller: App\Controller\VideoController::ListarVideo
-    methods: [POST]   
+    controller: App\Controller\VideoController::listarVideos
+    methods: [GET]   
    

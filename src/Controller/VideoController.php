@@ -4,12 +4,9 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\User;
 use App\Entity\Video;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\Encoder\JsonEncode;
-use Symfony\Component\Validator\Validation;
 use App\Services\JwtAuth;
 
 
@@ -171,4 +168,22 @@ class VideoController extends AbstractController
 
         return $this->resJson($data);
     }
+
+
+    // Listar los videos del usuario 
+
+      public function listarVideos(){
+
+        $data = [
+
+            "Status" => "Error",
+            "Code" => 500,
+            "Message" => "No se encontraron videos"
+        ];
+
+
+
+
+        return $this->resJson($data);
+      }
 }
