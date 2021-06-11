@@ -8,8 +8,9 @@ use App\Entity\User;
 use App\Entity\Video;
 use Symfony\Component\HttpFoundation\Request;
 use App\Services\JwtAuth;
-
-
+use Knp\Component\Pager\PaginatorInterface;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class VideoController extends AbstractController
 {
@@ -50,6 +51,7 @@ class VideoController extends AbstractController
     public function create(Request $request, JwtAuth $jwtAuth)
     {
 
+        
 
         $token = $request->headers->get('Autorization', null);
 
@@ -127,7 +129,7 @@ class VideoController extends AbstractController
                 $video_repo = $this->getDoctrine()->getRepository(Video::class);
 
 
-                $isset_video = $video_repo->findBy(array(
+                $isset_video = $video_repo->findOneBy(array(
                     'url' => $url
                 ));
 
@@ -151,7 +153,7 @@ class VideoController extends AbstractController
                     ];
                 }
         
-
+                
 
                 $em->persist($video);
                 $em->flush();
@@ -172,7 +174,13 @@ class VideoController extends AbstractController
 
     // Listar los videos del usuario 
 
-      public function listarVideos(){
+      public function listarVideos(Request $request,JwtAuth $jwtAuth,PaginatorInterface $paginator,EntityManagerInterface $e){
+
+        $token = $request->headers->get('Autorization');
+    
+        $auth = $jwtAuth->authToken($token);
+        $identity = $jwtAuth->authToken($token,true);
+       
 
         $data = [
 
@@ -180,6 +188,42 @@ class VideoController extends AbstractController
             "Code" => 500,
             "Message" => "No se encontraron videos"
         ];
+
+
+        if($auth){
+
+            $identity = $jwtAuth->authToken($token,true);   $identity = $jwtAuth->authToken($token,true);
+
+            $em = $this->getDoctrine()->getManager();
+            //$em->getRepository()
+            
+
+            
+          
+
+            $dql = " SELECT v FROM App\Entity\Video v WHERE v.user = {$identity->sub} ORDER BY v.id DESC";
+            $query = $e->createQuery($dql);
+
+            $page = $request->query->getInt('page',1);
+
+            $item_per_page = 5;
+
+            $pagination = $paginator->paginate($query,$page,$item_per_page);
+            $total = $pagination->getTotalItemCount();
+
+            $data = [
+                "Status" => "Success",
+                "Code" => 200,
+                "Total_items_count" => $total,
+                "page_actual"=>$page,
+                "item_per_page"=>$item_per_page,
+                "total_pages"=> ceil($total / $item_per_page),
+                "videos"=>$pagination,
+                "user_id"=>$identity->sub
+            
+            ];
+
+        }
 
 
 

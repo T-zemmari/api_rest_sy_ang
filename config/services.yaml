@@ -32,6 +32,8 @@ services:
 
     App\Services\JwtAuth: ['@doctrine.orm.entity_manager']
 
+
+
 knp_paginator:
   page_range: 5                      # rango por defecto de paginas en los controles del paginador
   default_options:
@@ -42,3 +44,5 @@ knp_paginator:
   template:
     pagination: '@KnpPaginator/Pagination/sliding.html.twig'  # plantilla controles
     sortable: KnpPaginatorBundle:Pagination:sortable_link.html.twig # plantilla links ordenación
+
+
