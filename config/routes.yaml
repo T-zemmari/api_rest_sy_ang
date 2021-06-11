@@ -34,12 +34,19 @@ video:
     path: /video
     controller: App\Controller\VideoController::index
     methods: [POST]
+
 newVideo:
     path: /video/new
     controller: App\Controller\VideoController::create
     methods: [POST]
+
 ListarVideo:
     path: /video/list
     controller: App\Controller\VideoController::listarVideos
-    methods: [GET]   
+    methods: [GET]
+
+ListarVideoPorID:
+    path: /video/detail/{id}
+    controller: App\Controller\VideoController::videoPorId
+    methods: [GET]      
    

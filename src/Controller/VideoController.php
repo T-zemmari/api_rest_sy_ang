@@ -230,4 +230,22 @@ class VideoController extends AbstractController
 
         return $this->resJson($data);
       }
+
+      // Obtener un video mediante su id pasado como parametro desde la url
+
+       
+      public function videoPorId(Request $request ,$id= null)
+      {
+          
+        $data = [
+
+            "Status" => "Error",
+            "Code" => 500,
+            "Message" => "El video No existe"
+        ];
+
+
+
+        return $this->resJson($data);
+      }
 }
