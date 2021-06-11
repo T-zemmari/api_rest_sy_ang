@@ -9,7 +9,6 @@ use App\Entity\Video;
 use Symfony\Component\HttpFoundation\Request;
 use App\Services\JwtAuth;
 use Knp\Component\Pager\PaginatorInterface;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 
 class VideoController extends AbstractController
@@ -298,5 +297,68 @@ class VideoController extends AbstractController
         //Devolver la respuesta  
 
         return $this->resJson($data);
+    }
+
+
+    // Metodo eliminar un video----------------------------------
+
+
+    public function removeVideo(Request $request,JwtAuth $jwtAuth , $id = null){
+
+        $token = $request->headers->get('Autorization');
+        $auth = $jwtAuth->authToken($token);
+        $data = [
+
+            "Status" => "Error",
+            "Code" => 500,
+            "Message" => "El video No existe",
+            "id" => $id
+        ];
+
+        if($auth){
+           
+            $identity = $jwtAuth->authToken($token, true);
+
+            $doctrine = $this->getDoctrine();
+
+            $em = $doctrine->getManager();
+            $miVideo = $doctrine->getRepository(Video::class)->findOneBy([
+
+                "id"=>$id
+            ]);
+
+
+            if($miVideo && is_object($miVideo) && $identity->sub == $miVideo->getUser()->getId()){
+
+                $em->remove($miVideo);
+                $em->flush();
+
+                $data = [
+
+                    "Status" => "Success",
+                    "Code" => 200,
+                    "Message" => "Video Eliminado",
+                    
+                ];
+
+            }else{
+
+                $data = [
+
+                    "Status" => "Error",
+                    "Code" => 500,
+                    "Message" => "No se ha podido eliminar el video",
+                    
+                ];
+            }
+            
+
+        }
+
+
+
+    
+      return $this->resJson($data);
+    
     }
 }

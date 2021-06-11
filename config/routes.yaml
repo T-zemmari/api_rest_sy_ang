@@ -8,7 +8,7 @@
 user:
     path: /user
     controller: App\Controller\UserController::index
-    methods: [POST]
+    methods: [GET]
 
 
 register:
@@ -48,5 +48,10 @@ ListarVideo:
 ListarVideoPorID:
     path: /video/detail/{id}
     controller: App\Controller\VideoController::videoPorId
-    methods: [GET]      
+    methods: [GET]   
+ 
+RemoveVideo:
+    path: /video/remove/{id}
+    controller: App\Controller\VideoController::removeVideo
+    methods: [DELETE]  
    
