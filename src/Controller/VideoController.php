@@ -50,7 +50,7 @@ class VideoController extends AbstractController
 
 
 
-    public function create(Request $request, JwtAuth $jwtAuth , $id = null)
+    public function create(Request $request, JwtAuth $jwtAuth, $id = null)
     {
 
 
@@ -119,111 +119,109 @@ class VideoController extends AbstractController
                     "id" => $identity->sub
                 ]);
 
-                
-
-                if($id == null){
-
-                $video = new Video();
-
-                $video->setTitle($title);
-                $video->setUrl($url);
-                $video->setUser($user);
-                $video->setStatus($status);
-                $video->setDescription($descripction);
-
-                $createdAt = new \DateTime('now');
-                $updatedAt = new \DateTime('now');
-
-                $video->setCreatedAt($createdAt);
-                $video->setUpdatedAt($updatedAt);
-
-                $video_repo = $this->getDoctrine()->getRepository(Video::class);
 
 
-                
+                if ($id == null) {
 
+                    $video = new Video();
 
-                $isset_video = $video_repo->findBy(array(
-                    'url' => $url
-                ));
+                    $video->setTitle($title);
+                    $video->setUrl($url);
+                    $video->setUser($user);
+                    $video->setStatus($status);
+                    $video->setDescription($descripction);
 
-            
+                    $createdAt = new \DateTime('now');
+                    $updatedAt = new \DateTime('now');
+
+                    $video->setCreatedAt($createdAt);
+                    $video->setUpdatedAt($updatedAt);
+
+                    $video_repo = $this->getDoctrine()->getRepository(Video::class);
 
 
 
 
-                if (count($isset_video) == 0) {
-               
-                    $data = [
 
-                        "Status" => "Success",
-                        "code" => "200",
-                        "message" => "Video Creado Correctamente",
-                        "video" => $video
-    
-                    ];
-    
+                    $isset_video = $video_repo->findBy(array(
+                        'url' => $url
+                    ));
+
+
+
+
+
+
+                    if (count($isset_video) == 0) {
+
+                        $data = [
+
+                            "Status" => "Success",
+                            "code" => "200",
+                            "message" => "Video Creado Correctamente",
+                            "video" => $video
+
+                        ];
+                    } else {
+                        $data = [
+
+                            "Status" => "Error",
+                            "code" => "500",
+                            "message" => "El Video ya existe"
+
+                        ];
+                    }
+
+
+
+                    $em->persist($video);
+                    $em->flush();
+
+                    //---------Aqui termina la creacion dell video.
                 } else {
-                    $data = [
 
-                        "Status" => "Error",
-                        "code" => "500",
-                        "message" => "El Video ya existe"
 
-                    ];
+                    $video = $this->getDoctrine()->getRepository(Video::class)->findOneBy([
+                        'id' => $id,
+                        'user' => $identity->sub
+                    ]);
+
+
+                    if ($video && is_object($video)) {
+
+
+                        //Como se ha cumplido la condicion del id no es nulo ahora puedo modificar
+
+
+                        $video->setTitle($title);
+                        $video->setUrl($url);
+                        $video->setStatus($status);
+                        $video->setDescription($descripction);
+                        $updatedAt = new \DateTime('now');
+                        $video->setUpdatedAt($updatedAt);
+
+
+
+
+
+
+
+                        $data = [
+
+                            "Status" => "Success",
+                            "code" => "200",
+                            "message" => "Video Creado Correctamente",
+                            "video" => $video
+
+                        ];
+
+
+
+
+                        $em->persist($video);
+                        $em->flush();
+                    }
                 }
-
-
-
-                $em->persist($video);
-                $em->flush();
-
-                //---------Aqui termina la creacion dell video.
-            }else{
-
-               //Como se ha cumplido la condicion del id no es nulo ahora puedo modificar
-               $video = new Video();
-               $video->setTitle($title);
-               $video->setUrl($url);
-               $video->setStatus($status);
-               $video->setDescription($descripction);
-               $updatedAt = new \DateTime('now');
-               $video->setUpdatedAt($updatedAt);
-
-               $video_repo = $this->getDoctrine()->getRepository(Video::class);
-
-
-               $isset_video = $video_repo->findOneBy(array(
-                   'id' => $id
-               ));
-
-
-               if (count($isset_video) == 0) {
-                   $data = [
-
-                       "Status" => "Success",
-                       "code" => "200",
-                       "message" => "Video Creado Correctamente",
-                       "user" => $video
-
-                   ];
-               } else {
-                   $data = [
-
-                       "Status" => "Error",
-                       "code" => "500",
-                       "message" => "El Video ya existe"
-
-                   ];
-               }
-
-
-
-               $em->persist($video);
-               $em->flush();
-            
-            
-            }
             }
         }
 
@@ -371,7 +369,8 @@ class VideoController extends AbstractController
     // Metodo eliminar un video----------------------------------
 
 
-    public function removeVideo(Request $request,JwtAuth $jwtAuth , $id = null){
+    public function removeVideo(Request $request, JwtAuth $jwtAuth, $id = null)
+    {
 
         $token = $request->headers->get('Autorization');
         $auth = $jwtAuth->authToken($token);
@@ -383,8 +382,8 @@ class VideoController extends AbstractController
             "id" => $id
         ];
 
-        if($auth){
-           
+        if ($auth) {
+
             $identity = $jwtAuth->authToken($token, true);
 
             $doctrine = $this->getDoctrine();
@@ -392,11 +391,11 @@ class VideoController extends AbstractController
             $em = $doctrine->getManager();
             $miVideo = $doctrine->getRepository(Video::class)->findOneBy([
 
-                "id"=>$id
+                "id" => $id
             ]);
 
 
-            if($miVideo && is_object($miVideo) && $identity->sub == $miVideo->getUser()->getId()){
+            if ($miVideo && is_object($miVideo) && $identity->sub == $miVideo->getUser()->getId()) {
 
                 $em->remove($miVideo);
                 $em->flush();
@@ -406,27 +405,23 @@ class VideoController extends AbstractController
                     "Status" => "Success",
                     "Code" => 200,
                     "Message" => "Video Eliminado",
-                    
-                ];
 
-            }else{
+                ];
+            } else {
 
                 $data = [
 
                     "Status" => "Error",
                     "Code" => 500,
                     "Message" => "No se ha podido eliminar el video",
-                    
+
                 ];
             }
-            
-
         }
 
 
 
-    
-      return $this->resJson($data);
-    
+
+        return $this->resJson($data);
     }
 }
